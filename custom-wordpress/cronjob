@@ -1,0 +1,2 @@
+* * * * * wget -q -O - http://0.0.0.0/wp-cron.php?doing_wp_cron >/dev/null 2>&1
+# Don't remove the empty line at the end of this file. It is required to run the cron job

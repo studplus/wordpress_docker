@@ -1,0 +1,75 @@
+version: "3.4"
+services:
+  # Wordpress Container
+  wordpress:
+    build:
+      context: ./custom-wordpress
+      dockerfile: Dockerfile
+    container_name: wordpress
+    ports:
+      - 80:80
+    depends_on:
+      - db
+    restart: always
+    volumes:
+      # create and link your WP-Folder, if you want to access it
+      #- ./wordpress:/var/www/html
+      # Use an external Uploads Folder
+      - ./WP_Uploads:/var/www/html/wp-content/uploads
+    logging:
+      options:
+        max-size: 10m
+  # Varnish Container
+  varnish:
+    build:
+      context: ./custom-varnish
+      dockerfile: Dockerfile
+    depends_on:
+      - wordpress
+    container_name: varnish
+    restart: always
+    ports:
+      - 6081:6081
+    volumes:
+      # if you want to check the logs
+      - /Applications/MAMP/logs/varnish:/var/log/
+    environment:
+      BACKENDS: "wordpress"
+      BACKENDS_PORT: 80
+      BACKENDS_PROBE_ENABLED: "false"
+    logging:
+      options:
+        max-size: 10m
+  # Maria DB
+  db:
+    image: mariadb:latest
+    container_name: wordpress_db
+    restart: always
+    volumes:
+      - ./wordpress_db:/var/lib/mysql
+      - ./custom-mysql/my.cnf:/etc/mysql/my.cnf
+    ports:
+      - 3306:3306
+    environment:
+      # change the PW
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: user
+      # change the PW
+      MYSQL_PASSWORD: password
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci', '--default-authentication-plugin=mysql_native_password']
+  # PhpMyAdmin Service
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: wordpress_phpmyadmin
+    ports:
+      - 8081:80
+    environment:
+      PMA_HOST: db
+    volumes:
+      - phpmyadmindata:/usr/src/phpmyadmin:delegated
+    depends_on:
+      - db
+# Volumes
+volumes:
+  phpmyadmindata:

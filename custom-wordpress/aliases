@@ -1,0 +1,3 @@
+postmaster:    Wordpress
+root:          server@mydomain.com
+Wordpress:     info@mydomain.com
