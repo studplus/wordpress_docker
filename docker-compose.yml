@@ -32,7 +32,7 @@ services:
       - 6081:6081
     volumes:
       # if you want to check the logs
-      - /Applications/MAMP/logs/varnish:/var/log/
+      - ./varnish:/var/log/
     environment:
       BACKENDS: "wordpress"
       BACKENDS_PORT: 80
