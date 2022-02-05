@@ -27,7 +27,7 @@ RUN	\
     && sh -c 'echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list' \
 	&& apt-get update \
 	&& apt-get -o Dpkg::Options::="--force-confnew" upgrade -y \
-    && apt-get -o Dpkg::Options::="--force-confnew" install -y curl apache2 libapache2-mod-${PHP_VER} php-pear git cron msmtp mailutils nano logrotate \
+    && apt-get -o Dpkg::Options::="--force-confnew" install -y curl apache2 libapache2-mod-${PHP_VER} php-pear git cron msmtp mailutils nano logrotate zip unzip \
     && apt-get -o Dpkg::Options::="--force-confnew" install -y ${PHP_VER}-common ${PHP_VER}-mysql ${PHP_VER}-xml  ${PHP_VER}-xmlrpc ${PHP_VER}-curl ${PHP_VER}-gd ${PHP_VER}-imagick ${PHP_VER}-cli ${PHP_VER}-dev ${PHP_VER}-imap ${PHP_VER}-mbstring ${PHP_VER}-readline ${PHP_VER}-opcache ${PHP_VER}-soap ${PHP_VER}-zip ${PHP_VER}-intl ${PHP_VER}-bcmath \
 	# Cleaning
 	&& apt-get purge -y --auto-remove $BUILD_DEPS \
@@ -48,6 +48,16 @@ COPY ./entrypoint.sh /sbin/entrypoint.sh
 COPY ./cronjob /etc/cron.d/cronjob
 COPY ./aliases /etc/aliases
 COPY ./msmtprc /etc/msmtprc
+
+WORKDIR ${WWW_DIR}
+# Download latest Wordpress
+RUN rm -rf index.html \
+  && wget https://wordpress.org/latest.zip \
+  && unzip latest.zip \
+  # Copy Files to Web-Folder to make it available
+  && cp -a wordpress/. ${WWW_DIR} \
+  && rm -f -r latest.zip wordpress \
+  && chown -Rf www-data:www-data ${WWW_DIR} 
 
 RUN \
 	chmod 644 /etc/msmtprc \
