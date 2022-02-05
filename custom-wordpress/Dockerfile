@@ -1,17 +1,17 @@
-FROM ubuntu:latest
+FROM debian:latest
 
 ENV OS_LOCALE="de_DE.UTF-8"
-RUN apt-get update && apt-get install -y locales && locale-gen ${OS_LOCALE}
+RUN apt-get update && apt-get install -y locales apt-utils && echo "de_DE.UTF-8 UTF-8\nde_DE ISO-8859-1\nde_DE@euro ISO-8859-15" >> /etc/locale.gen && locale-gen ${OS_LOCALE}
 ENV LANG=${OS_LOCALE} \
     LANGUAGE=${OS_LOCALE} \
     LC_ALL=${OS_LOCALE} \
-    DEBIAN_FRONTEND=noninteractive
-
-ENV APACHE_CONF_DIR=/etc/apache2 \
-    PHP_CONF_DIR=/etc/php/7.4 \
+    DEBIAN_FRONTEND=noninteractive \
+	TZ="Europe/Berlin" \
+	APACHE_CONF_DIR=/etc/apache2 \
+    PHP_CONF_DIR=/etc/php/8.1 \
     PHP_DATA_DIR=/var/lib/php \
 	WWW_DIR=/var/www/html \
-	PHP_VER="php7.4"
+	PHP_VER="php8.1"
 
 RUN mkdir -p /usr/share/man/man1
 
@@ -21,12 +21,14 @@ RUN	\
 	BUILD_DEPS='software-properties-common' \
     && dpkg-reconfigure locales \
     && apt-get update \
-	&& apt-get install --no-install-recommends -y $BUILD_DEPS \
-	&& add-apt-repository -y ppa:ondrej/php \
-	&& add-apt-repository -y ppa:ondrej/apache2 \
-	&& apt-get update && apt-get upgrade -y\
-    && apt-get install -y curl apache2 libapache2-mod-${PHP_VER} php-pear git cron msmtp mailutils wget nano \
-    && apt-get install -y ${PHP_VER}-common ${PHP_VER}-mysql ${PHP_VER}-xml  ${PHP_VER}-xmlrpc ${PHP_VER}-curl ${PHP_VER}-gd ${PHP_VER}-imagick ${PHP_VER}-cli ${PHP_VER}-dev ${PHP_VER}-imap ${PHP_VER}-mbstring ${PHP_VER}-readline ${PHP_VER}-opcache ${PHP_VER}-soap ${PHP_VER}-zip ${PHP_VER}-json ${PHP_VER}-intl ${PHP_VER}-bcmath \
+	&& apt-get -o Dpkg::Options::="--force-confnew" install --no-install-recommends -y $BUILD_DEPS lsb-release ca-certificates apt-transport-https gnupg2 wget \
+	# PHP8.1 Key
+	&& wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg \
+    && sh -c 'echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list' \
+	&& apt-get update \
+	&& apt-get -o Dpkg::Options::="--force-confnew" upgrade -y \
+    && apt-get -o Dpkg::Options::="--force-confnew" install -y curl apache2 libapache2-mod-${PHP_VER} php-pear git cron msmtp mailutils nano logrotate \
+    && apt-get -o Dpkg::Options::="--force-confnew" install -y ${PHP_VER}-common ${PHP_VER}-mysql ${PHP_VER}-xml  ${PHP_VER}-xmlrpc ${PHP_VER}-curl ${PHP_VER}-gd ${PHP_VER}-imagick ${PHP_VER}-cli ${PHP_VER}-dev ${PHP_VER}-imap ${PHP_VER}-mbstring ${PHP_VER}-readline ${PHP_VER}-opcache ${PHP_VER}-soap ${PHP_VER}-zip ${PHP_VER}-intl ${PHP_VER}-bcmath \
 	# Cleaning
 	&& apt-get purge -y --auto-remove $BUILD_DEPS \
 	&& apt-get autoremove -y \
