@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: wordpress
     ports:
-      - 80:80
+      - 8080:80
     depends_on:
       - db
     restart: always
@@ -21,18 +21,17 @@ services:
         max-size: 10m
   # Varnish Container
   varnish:
-    build:
-      context: ./custom-varnish
-      dockerfile: Dockerfile
+    image: varnish:fresh
     depends_on:
       - wordpress
     container_name: varnish
     restart: always
     ports:
-      - 6081:6081
+      - 80:80
     volumes:
       # if you want to check the logs
       - ./varnish:/var/log/
+      - ./custom-varnish/wordpress.vcl:/etc/varnish/default.vcl:ro
     environment:
       BACKENDS: "wordpress"
       BACKENDS_PORT: 80

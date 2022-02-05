@@ -22,12 +22,12 @@
 vcl 4.0;
 
 # Imports
-#import std;
+import std;
 
 # Default backend definition. Set this to point to your content server.
 backend default {
     .host = "wordpress"; # UPDATE this only if the web server is not on the same machine
-    .port = "80";      # UPDATE 8080 with your web server's (internal) port
+    .port = "8080";      # UPDATE 8080 with your web server's (internal) port
 }
 
 sub vcl_recv {
