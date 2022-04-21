@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM debian:11
 
 ENV OS_LOCALE="de_DE.UTF-8"
 RUN apt-get update && apt-get install -y locales apt-utils && echo "de_DE.UTF-8 UTF-8\nde_DE ISO-8859-1\nde_DE@euro ISO-8859-15" >> /etc/locale.gen && locale-gen ${OS_LOCALE}
