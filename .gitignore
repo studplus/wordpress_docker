@@ -4,6 +4,7 @@
 .scannerwork
 .vscode
 /.htaccess
+wordpress_db
 
 # ignore node dependency directories
 node_modules/
