@@ -1,6 +1,6 @@
 FROM debian:latest
 
-ARG PHP=8.1 OS_LOCALE="de_DE.UTF-8" TZ="Europe/Berlin"
+ARG PHP=8.2 OS_LOCALE="de_DE.UTF-8" TZ="Europe/Berlin"
 RUN apt-get update && apt-get install -y locales apt-utils && echo "$OS_LOCALE UTF-8\nde_DE ISO-8859-1\nde_DE@euro ISO-8859-15" >> /etc/locale.gen && locale-gen $OS_LOCALE
 ARG LANG=$OS_LOCALE \
     LANGUAGE=$OS_LOCALE \
