@@ -1,6 +1,6 @@
 FROM debian:latest
 
-ARG PHP=8.2 OS_LOCALE="de_DE.UTF-8" TZ="Europe/Berlin"
+ARG PHP=8.3 OS_LOCALE="de_DE.UTF-8" TZ="Europe/Berlin"
 RUN apt-get update && apt-get install -y locales apt-utils && echo "$OS_LOCALE UTF-8\nde_DE ISO-8859-1\nde_DE@euro ISO-8859-15" >> /etc/locale.gen && locale-gen $OS_LOCALE
 ARG LANG=$OS_LOCALE \
     LANGUAGE=$OS_LOCALE \
@@ -26,7 +26,7 @@ RUN	\
     && sh -c 'echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list' \
 	&& apt-get update \
 	&& apt-get -o Dpkg::Options::="--force-confnew" upgrade -y \
-    && apt-get -o Dpkg::Options::="--force-confnew" install -y curl apache2 libapache2-mod-$PHP_VER php-pear git cron msmtp mailutils nano logrotate zip unzip \
+    && apt-get -o Dpkg::Options::="--force-confnew" install -y curl apache2 libapache2-mod-$PHP_VER php-pear git cron msmtp msmtp-mta mailutils nano logrotate zip unzip \
     && apt-get -o Dpkg::Options::="--force-confnew" install -y $PHP_VER-common $PHP_VER-mysql $PHP_VER-xml  $PHP_VER-xmlrpc $PHP_VER-curl $PHP_VER-gd $PHP_VER-imagick $PHP_VER-cli $PHP_VER-dev $PHP_VER-imap $PHP_VER-mbstring $PHP_VER-readline $PHP_VER-opcache $PHP_VER-soap $PHP_VER-zip $PHP_VER-intl $PHP_VER-bcmath \
 	# Cleaning
 	&& apt-get purge -y --auto-remove $BUILD_DEPS \
@@ -47,6 +47,7 @@ COPY entrypoint.sh /sbin/entrypoint.sh
 COPY cronjob /etc/cron.d/cronjob
 COPY aliases /etc/aliases
 COPY msmtprc /etc/msmtprc
+COPY mail.rc /etc/mail.rc
 
 WORKDIR $WWW_DIR
 # Download latest Wordpress
@@ -63,7 +64,10 @@ RUN \
 	&& chmod 755 /sbin/entrypoint.sh \
 	&& chmod 0644 /etc/cron.d/cronjob \
 	&& crontab /etc/cron.d/cronjob \
-	&& chown www-data:www-data $WWW_DIR -Rf
+	&& chown www-data:www-data $WWW_DIR -Rf \
+	&& touch /var/log/msmtp.log \
+	&& chown mail:mail /var/log/msmtp.log \
+	&& chmod 660 /var/log/msmtp.log
 
 COPY php.ini-production $PHP_INI_DIR/php.ini
 RUN \
@@ -75,5 +79,5 @@ COPY app.conf $APACHE_CONF_DIR/sites-available/mydomain.conf
 RUN \
 	a2enmod rewrite $PHP_VER \
 	&& a2ensite mydomain.conf
-
+WORKDIR ${WWW_DIR}
 CMD ["/sbin/entrypoint.sh"]
