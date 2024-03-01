@@ -1,8 +1,16 @@
 # wordpress_docker
 Docker Template for Wordpress with MariaDB, Varnish and PHPmyAdmin
 ## basic config
-Check:
-* /custom-varnish/wordpress.vcl - for all your wp-folders, which one should not be cached
+### Installation
+* to to your /opt folder 
+
+`cd /opt`
+* clone the git project
+
+`git clone https://github.com/studplus/wordpress_docker.git`
+* Check:
+
+/custom-varnish/wordpress.vcl - for all your wp-folders, which one should not be cached
 ### /custom-wordpress/
 * aliases - for your domain name and email-adress
 * app.conf - for your domain (ServerAlias) and ServerEMail-Address (ServerAdmin)
@@ -13,3 +21,11 @@ Check:
 ### wordpress configuration
 * Enter the Database-Name, User and Password as configured in docker-compose.yml under db
 * for Database-Host use only `db` - nothing else
+## Update the Docker container
+* run the update.sh with your cronjob every week on your host-system
+
+`crontab -e`
+
+insert:
+
+`00 02 * * 7 /opt/wordpress_docker/update_docker_container.sh > /dev/null 2>&1`
