@@ -24,8 +24,12 @@ Docker Template for Wordpress with MariaDB, Varnish and PHPmyAdmin
 ## Update the Docker container
 * run the update.sh with your cronjob every week on your host-system
 
-`crontab -e`
+```
+chmod +x ./update_docker_container.sh 
+crontab -e
+```
 
 insert:
 
 `00 02 * * 7 /opt/wordpress_docker/update_docker_container.sh > /dev/null 2>&1`
+
