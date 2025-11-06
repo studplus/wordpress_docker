@@ -21,7 +21,7 @@ services:
         max-size: 10m
   # Varnish Container
   varnish:
-    image: varnish:fresh
+    image: varnish:stable
     depends_on:
       - wordpress
     container_name: varnish
