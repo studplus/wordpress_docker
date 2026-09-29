@@ -1,7 +1,8 @@
 # wordpress_docker
 Docker template for WordPress with MariaDB, Varnish and phpMyAdmin.
 
-WordPress runs on Debian with Apache and PHP 8.3, Varnish caches in front of it on port 80.
+WordPress runs on Debian with Apache and PHP 8.5, Varnish caches in front of it on port 80.
+To build with another PHP version, change `ARG PHP` in `custom-wordpress/Dockerfile`.
 A step-by-step guide for Debian and Ubuntu, from installing Docker to the first start, is at
 [todisco.de (German)](https://todisco.de/de/blog/wordpress-docker) and
 [todisco.de (English)](https://todisco.de/en/blog/wordpress-docker).
@@ -92,3 +93,4 @@ sudo docker compose up -d --build
 sudo docker cp ./html-backup/. wordpress:/var/www/html/
 sudo docker exec wordpress chown -R www-data:www-data /var/www/html
 ```
+phpMyAdmin no longer uses a volume. The old one can go: `sudo docker volume rm wordpress_docker_phpmyadmindata`

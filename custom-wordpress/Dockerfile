@@ -1,6 +1,6 @@
 FROM debian:latest
 
-ARG PHP=8.3 OS_LOCALE="de_DE.UTF-8" TZ="Europe/Berlin"
+ARG PHP=8.5 OS_LOCALE="de_DE.UTF-8" TZ="Europe/Berlin"
 RUN apt-get update && apt-get install -y locales apt-utils && echo "$OS_LOCALE UTF-8\nde_DE ISO-8859-1\nde_DE@euro ISO-8859-15" >> /etc/locale.gen && locale-gen $OS_LOCALE
 ARG LANG=$OS_LOCALE \
     LANGUAGE=$OS_LOCALE \
@@ -28,7 +28,9 @@ RUN	\
 	&& apt-get update \
 	&& apt-get -o Dpkg::Options::="--force-confnew" upgrade -y \
     && apt-get -o Dpkg::Options::="--force-confnew" install -y curl apache2 libapache2-mod-$PHP_VER php-pear git cron msmtp msmtp-mta mailutils nano logrotate zip unzip \
-    && apt-get -o Dpkg::Options::="--force-confnew" install -y $PHP_VER-common $PHP_VER-mysql $PHP_VER-xml  $PHP_VER-xmlrpc $PHP_VER-curl $PHP_VER-gd $PHP_VER-imagick $PHP_VER-cli $PHP_VER-dev $PHP_VER-imap $PHP_VER-mbstring $PHP_VER-readline $PHP_VER-opcache $PHP_VER-soap $PHP_VER-zip $PHP_VER-intl $PHP_VER-bcmath \
+    && apt-get -o Dpkg::Options::="--force-confnew" install -y $PHP_VER-common $PHP_VER-mysql $PHP_VER-xml  $PHP_VER-xmlrpc $PHP_VER-curl $PHP_VER-gd $PHP_VER-imagick $PHP_VER-cli $PHP_VER-dev $PHP_VER-imap $PHP_VER-mbstring $PHP_VER-readline $PHP_VER-soap $PHP_VER-zip $PHP_VER-intl $PHP_VER-bcmath \
+	# OPcache is built into PHP from 8.5 on, older versions need the package
+	&& if apt-cache show $PHP_VER-opcache >/dev/null 2>&1; then apt-get install -y $PHP_VER-opcache; fi \
 	# Cleaning
 	&& apt-get autoremove -y \
 	&& rm -rf /var/lib/apt/lists/* \

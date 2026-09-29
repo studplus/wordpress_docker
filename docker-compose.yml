@@ -60,17 +60,14 @@ services:
     command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
   # PhpMyAdmin Service
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
+    image: phpmyadmin:latest
     container_name: wordpress_phpmyadmin
     ports:
       - 8081:80
     environment:
       PMA_HOST: db
-    volumes:
-      - phpmyadmindata:/usr/src/phpmyadmin:delegated
     depends_on:
       - db
 # Volumes
 volumes:
   wordpress_data:
-  phpmyadmindata:
