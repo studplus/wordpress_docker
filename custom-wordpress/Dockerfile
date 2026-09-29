@@ -17,19 +17,19 @@ RUN mkdir -p /usr/share/man/man1
 # Install cron msmtp mailutils pdftk
 
 RUN	\
-	BUILD_DEPS='software-properties-common' \
-    && dpkg-reconfigure locales \
+    dpkg-reconfigure locales \
     && apt-get update \
-	&& apt-get -o Dpkg::Options::="--force-confnew" install --no-install-recommends -y $BUILD_DEPS lsb-release ca-certificates apt-transport-https gnupg2 wget \
-	# PHP8.1 Key
-	&& wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg \
-    && sh -c 'echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list' \
+	&& apt-get -o Dpkg::Options::="--force-confnew" install --no-install-recommends -y ca-certificates curl wget \
+	# PHP repository by Ondřej Surý (packages.sury.org)
+	&& curl -sSLo /tmp/debsuryorg-archive-keyring.deb https://packages.sury.org/debsuryorg-archive-keyring.deb \
+	&& dpkg -i /tmp/debsuryorg-archive-keyring.deb \
+	&& rm /tmp/debsuryorg-archive-keyring.deb \
+    && echo "deb [signed-by=/usr/share/keyrings/debsuryorg-archive-keyring.gpg] https://packages.sury.org/php/ $(. /etc/os-release && echo "$VERSION_CODENAME") main" > /etc/apt/sources.list.d/php.list \
 	&& apt-get update \
 	&& apt-get -o Dpkg::Options::="--force-confnew" upgrade -y \
     && apt-get -o Dpkg::Options::="--force-confnew" install -y curl apache2 libapache2-mod-$PHP_VER php-pear git cron msmtp msmtp-mta mailutils nano logrotate zip unzip \
     && apt-get -o Dpkg::Options::="--force-confnew" install -y $PHP_VER-common $PHP_VER-mysql $PHP_VER-xml  $PHP_VER-xmlrpc $PHP_VER-curl $PHP_VER-gd $PHP_VER-imagick $PHP_VER-cli $PHP_VER-dev $PHP_VER-imap $PHP_VER-mbstring $PHP_VER-readline $PHP_VER-opcache $PHP_VER-soap $PHP_VER-zip $PHP_VER-intl $PHP_VER-bcmath \
 	# Cleaning
-	&& apt-get purge -y --auto-remove $BUILD_DEPS \
 	&& apt-get autoremove -y \
 	&& rm -rf /var/lib/apt/lists/* \
 	# Forward request and error logs to docker log collector
@@ -69,7 +69,7 @@ RUN \
 	&& chown mail:mail /var/log/msmtp.log \
 	&& chmod 660 /var/log/msmtp.log
 
-COPY php.ini-production $PHP_INI_DIR/php.ini
+COPY php.ini-production $PHP_CONF_DIR/apache2/php.ini
 RUN \
     # Apache settings
     cp /dev/null $APACHE_CONF_DIR/conf-available/other-vhosts-access-log.conf \

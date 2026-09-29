@@ -1,4 +1,3 @@
-version: "3.4"
 services:
   # Wordpress Container
   wordpress:
@@ -12,8 +11,8 @@ services:
       - db
     restart: always
     volumes:
-      # create and link your WP-Folder, if you want to access it
-      #- ./wordpress:/var/www/html
+      # WordPress files incl. wp-config.php, plugins and themes survive rebuilds and updates
+      - wordpress_data:/var/www/html
       # Use an external Uploads Folder
       - ./WP_Uploads:/var/www/html/wp-content/uploads
     logging:
@@ -46,7 +45,7 @@ services:
     restart: always
     volumes:
       - ./wordpress_db:/var/lib/mysql
-      - ./custom-mysql/my.cnf:/etc/mysql/my.cnf
+      - ./custom-mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
     ports:
       - 3306:3306
     environment:
@@ -56,7 +55,9 @@ services:
       MYSQL_USER: user
       # change the PW
       MYSQL_PASSWORD: password
-    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+      # upgrade the system tables when mariadb:latest brings a new version
+      MARIADB_AUTO_UPGRADE: "1"
+    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
   # PhpMyAdmin Service
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
@@ -71,4 +72,5 @@ services:
       - db
 # Volumes
 volumes:
+  wordpress_data:
   phpmyadmindata:
